@@ -2,54 +2,37 @@ pipeline {
     agent any
 
     triggers {
-        cron('H/3 * * * 4') // Runs every 3 minutes on Thursdays
-    }
-
-    tools {
-        maven 'Maven 3'
-        jdk 'JDK 11'
+        cron('H/3 * * * 1') // Runs every 3 minutes on Mondays
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/girisujan2001/spring-petclinic.git'
-            }
-        }
-
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                sh './mvnw clean package'
             }
         }
 
-        stage('Test & Code Coverage') {
+        stage('Test') {
             steps {
-                sh 'mvn test'
-                sh 'mvn jacoco:report'
+                sh './mvnw test'
             }
         }
 
-        stage('Archive Artifacts') {
+        stage('Code Coverage') {
+            steps {
+                sh './mvnw jacoco:report'
+                publishHTML(target: [
+                    reportDir: 'target/site/jacoco',
+                    reportFiles: 'index.html',
+                    reportName: 'JaCoCo Code Coverage'
+                ])
+            }
+        }
+
+        stage('Artifact') {
             steps {
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
-
-        stage('Publish Jacoco Report') {
-            steps {
-                jacoco execPattern: '**/target/jacoco.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java'
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
-        }
     }
 }
-
