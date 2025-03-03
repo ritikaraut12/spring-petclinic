@@ -19,21 +19,22 @@ pipeline {
         }
 
         stage('Code Coverage') {
-            steps {
-                bat './mvnw jacoco:report'  // Change 'sh' to 'bat'
+    steps {
+        bat './mvnw jacoco:report'  // Run JaCoCo
+        script {
+            def jacocoDir = 'target/site/jacoco'
+            def jacocoReport = "${jacocoDir}/index.html"
+
+            if (fileExists(jacocoReport)) {
+                echo "JaCoCo report found!"
                 publishHTML(target: [
-                    reportDir: 'target/site/jacoco',
+                    reportDir: jacocoDir,
                     reportFiles: 'index.html',
                     reportName: 'JaCoCo Code Coverage'
                 ])
-            }
-        }
-
-        stage('Artifact') {
-            steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            } else {
+                error "JaCoCo report not found at ${jacocoReport}"
             }
         }
     }
 }
-
