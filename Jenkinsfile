@@ -8,19 +8,19 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh './mvnw clean package'
+                bat './mvnw clean package'  // Change 'sh' to 'bat'
             }
         }
 
         stage('Test') {
             steps {
-                sh './mvnw test'
+                bat './mvnw test'  // Change 'sh' to 'bat'
             }
         }
 
         stage('Code Coverage') {
             steps {
-                sh './mvnw jacoco:report'
+                bat './mvnw jacoco:report'  // Change 'sh' to 'bat'
                 publishHTML(target: [
                     reportDir: 'target/site/jacoco',
                     reportFiles: 'index.html',
@@ -36,3 +36,4 @@ pipeline {
         }
     }
 }
+
